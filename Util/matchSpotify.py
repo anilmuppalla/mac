@@ -48,7 +48,8 @@ class Constants:
 		self.musix_data = { "apikey": self.musix_api_key,
 					  "f_has_lyrics": 1,
 					  "format": "json",
-					  "page_size":1 }
+					  "page_size":1,
+					  "s_track_rating":"desc"}
 		self.spotify_url = "https://api.spotify.com/v1/search"
 		self.spotify_data = {"limit": 10}
 
