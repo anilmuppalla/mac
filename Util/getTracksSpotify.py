@@ -54,17 +54,15 @@ class Tracks:
 		tracklist = data["message"]["body"]["track_list"]
 
 		for item in tracklist:
-
 			item = item["track"]
-			name = item["track_name"]
+			track_name = item["track_name"]
 			artist = item["artist_name"]
-			print name, artist
-			results = spotify_const.search(q=name, type='track')
+			print track_name, ":", artist
+			query = "track:" + track_name + "%20" + "artist:" + artist 
+			results = spotify_const.search(q=track_name, type='track')
 			for track in results['tracks']['items']:
 				if SequenceMatcher(None, track['artists'][0]['name'], artist).ratio() > 0.5:
-				# if track['artists'][0]['name'] in artist:
-					self.trackMap[name] = {"artist" : track['artists'][0]['name'] , "preview" : track['preview_url']}
-					print SequenceMatcher(None, track['artists'][0]['name'], artist).ratio()
+					self.trackMap[track_name] = {"artist" : track['artists'][0]['name'] , "link" : track['external_urls']['spotify'], "name" : track['name']}
 
 	def getTrackMap(self):
 		return self.trackMap

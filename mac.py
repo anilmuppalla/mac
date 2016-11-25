@@ -1,6 +1,11 @@
 import os
 import time
+import sys
+
 from slackclient import SlackClient
+from Util import getTracksSpotify as GTS
+from spotipy import oauth2, Spotify
+
 
 # starterbot's ID as an environment variable
 BOT_ID = os.environ.get("BOT_ID")
@@ -18,13 +23,24 @@ def handle_command(command, channel):
         are valid commands. If so, then acts on the commands. If not,
         returns back what it needs for clarification.
 	"""
-	response = "Not sure what you mean. Use the *" + EXAMPLE_COMMAND + \
-               "* command with numbers, delimited by spaces."
-	if command.startswith(EXAMPLE_COMMAND):
-		response = "Sure...write some more code then I can do that!"
-	slack_client.api_call("chat.postMessage", channel=channel, 
-		text=response, as_user=True)
-
+	lyrics = command
+	musix = GTS.Musix()
+	params = {"q_lyrics": lyrics}
+	musix.addMusixParams(params)
+	musix.getTracksFromLyrics()
+	res = musix.getTracks()
+	spotipyCred = oauth2.SpotifyClientCredentials(client_id='5404d36c8bfe444cb1ca8ad56a3569c0', 
+		client_secret='0ac167a19f064eafa153e0f01dd8e2f0')
+	spotify_const = Spotify(client_credentials_manager=spotipyCred)
+	tracks = GTS.Tracks()
+	tracks.buildTrackMap(res, spotify_const)
+	mapsongs = tracks.getTrackMap()
+	for key in mapsongs.keys():
+		# print mapsongs[key]['preview']
+		message = mapsongs[key]['link']
+		print message
+		slack_client.api_call("chat.postMessage", channel=channel, text=message, as_user=True)
+	
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
@@ -34,9 +50,8 @@ def parse_slack_output(slack_rtm_output):
     output_list = slack_rtm_output
     if output_list and len(output_list) > 0:
     	for output in output_list:
-    		if output and 'text' in output and AT_BOT in output['text']:
-				# return text after the @ mention, whitespace removed
-				return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']
+    		if output['text']:
+    			return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']	
 	return None, None
 
 if __name__ == "__main__":
@@ -50,6 +65,7 @@ if __name__ == "__main__":
 				if command and channel:
 					handle_command(command, channel)
 			except:
+				print "Exception"
 				pass
 			# print channel
 			time.sleep(READ_WEBSOCKET_DELAY)
