@@ -46,7 +46,7 @@ var encodeQueryFromArgs = function(args){
 
 			return result;
 		}
-
+		
 var matcher = function(artist, bot, message, data){
 	var trackUrls = {};
 	for (var track of data.body.tracks.items) {
