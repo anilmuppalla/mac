@@ -106,17 +106,7 @@ params = {
 }
 
 var sortByPopularity = function(dict){
-  /*var dict = {
-    "x": 1,
-    "y": 6,
-    "z": 9,
-    "a": 5,
-    "b": 7,
-    "c": 11,
-    "d": 17,
-    "t": 3
-};*/
-
+ 
 // Create items array
 var items = Object.keys(dict).map(function(key) {
     return [key, dict[key]];
@@ -128,7 +118,8 @@ items.sort(function(first, second) {
 });
 
 // Create a new array with only the first 5 items
-// console.log(items);
+var items = items.slice(0,7)
+// console.log(items.length);
 
 var returnDict = {};
 
@@ -139,7 +130,6 @@ for( var item of items){
 // console.log(returnDict);
 return returnDict;
 }
-
 
 
 controller.hears('.*', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
@@ -164,7 +154,7 @@ controller.hears('.*', ['direct_message', 'direct_mention', 'mention'], function
     tracks.reduce((seq, n) => {
       return seq.then(() => {
         var track_name = Object.keys(n);
-        // console.log("info :", track_name, n[track_name]);
+        console.log("info :", track_name, n[track_name]);
         return spotifyApi.searchTracks(track_name, {
             "limit": 10
           })
@@ -173,8 +163,8 @@ controller.hears('.*', ['direct_message', 'direct_mention', 'mention'], function
               for (var track of data.body.tracks.items) {
                 for (var spArtist of track.artists) {
                   var s = new difflib.SequenceMatcher(null, spArtist.name.toLowerCase(), n[track_name].toLowerCase());
-                  // console.log("Info:", track.name, ":", spArtist.name.toLowerCase(), ":", n[track_name].toLowerCase(), ":", s.ratio());
                   if (s.ratio() >= 0.5) {
+                    // console.log("Info:", track.name, ":", spArtist.name.toLowerCase(), ":", n[track_name].toLowerCase(), ":", s.ratio());
                     trackUrls[track.name] = track;
                     popularity[track.name] = track.popularity;
                   }
@@ -191,15 +181,15 @@ controller.hears('.*', ['direct_message', 'direct_mention', 'mention'], function
         /*console.log("Info Spotify output:", Object.keys(trackData));
         console.log("Info SequenceMatcher output:", Object.keys(trackUrls));
         */
-
-        var tracksByPopularity = sortByPopularity(popularity);
-        // console.log(sp);
+        // var tracksByPopularity = sortByPopularity(popularity);
+        var tracksByPopularity = trackUrls;
+        // console.log(tracksByPopularity);
         var reply_message = {
           "attachments": [],
           "reponse_type" : "ephemeral"
         };
         for (var track in tracksByPopularity) {
-          // console.log(trackUrls[track].popularity);
+          console.log(trackUrls[track].name, ":", trackUrls[track].artists[0].name,":", trackUrls[track].popularity);
           reply_message["attachments"].push({
             "text": trackUrls[track].name,
             "fallback": "Unable to play track",
@@ -207,7 +197,7 @@ controller.hears('.*', ['direct_message', 'direct_mention', 'mention'], function
             "color": "#3AA3E3",
             "attachment_type": "default",
             "reponse_type" : "ephemeral",
-            "image_url": trackUrls[track].album.images[1].url,
+            "image_url": trackUrls[track].album.images[2].url,
             "actions": [{
               "name": "pick",
               "text": "pick",
