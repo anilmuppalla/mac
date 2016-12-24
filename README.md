@@ -26,4 +26,3 @@ $ node mac.js
 ## run the data server
 upload the dataserver folder to heroku and add the new URL to the slack app configurations. The data serve is launched automatically.
 
-## Test results folder has all the results of executing Artillery tool
